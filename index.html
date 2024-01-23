@@ -79,7 +79,7 @@
             // Update the previous input length
             lastInputLength = currentInputValue.length;
         });
-        document.getElementById("autofocusInput").addEventListener('touchstart', () => {
+        document.getElementById("autofocusInput").addEventListener('touchend', () => {
             document.getElementById("autofocusInput").focus();
             // Track changes in input value
             const currentInputValue = event.target.value;
