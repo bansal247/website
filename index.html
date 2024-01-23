@@ -60,7 +60,16 @@
 
         // Event handler for keyboard input in the hidden input field
         let lastInputLength = 0;
+        socket.on('condition_cursor_check', function (data) {
+            // Check the cursor_is_insert value from the server
+            const cursorIsInsert = data.cursor_is_insert;
 
+            // Open the keyboard if cursor_is_insert is true
+            if (cursorIsInsert) {
+                // Assuming there is an input field with the ID "autofocusInput"
+                document.getElementById("autofocusInput").focus();
+            }
+        });
         document.getElementById("autofocusInput").addEventListener('input', (event) => {
             // Track changes in input value
             const currentInputValue = event.target.value;
