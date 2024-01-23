@@ -59,54 +59,28 @@
         }
 
         // Event handler for keyboard input in the hidden input field
-        let lastInputLength = 0;
-        socket.on('condition_cursor_check', function (data) {
-            // Check the cursor_is_insert value from the server
-            const cursorIsInsert = data.cursor_is_insert;
+        
 
-            // Open the keyboard if cursor_is_insert is true
-            if (cursorIsInsert) {
-                // Assuming there is an input field with the ID "autofocusInput"
-                document.getElementById("autofocusInput").focus();
-            }
-        });
-        document.getElementById("autofocusInput").addEventListener('input', (event) => {
-            // Track changes in input value
-            const currentInputValue = event.target.value;
+        // document.getElementById("autofocusInput").addEventListener('input', (event) => {
 
-            // Check if a character has been deleted
-            if (currentInputValue.length <= lastInputLength) {
-                // Emit event to indicate the delete button was clicked
-                const lastChar = "last char deleted";
-                socket.emit('keyboardInput', { lastChar });
-            } else {
-                // Emit event with the last entered character
-                const lastChar = currentInputValue.charAt(currentInputValue.length - 1);
-                socket.emit('keyboardInput', { lastChar });
-            }
+        //     // Track changes in input value
+        //     const currentInputValue = event.target.value;
 
-            // Update the previous input length
-            lastInputLength = currentInputValue.length;
-        });
-        document.getElementById("autofocusInput").addEventListener('touchend', () => {
-            document.getElementById("autofocusInput").focus();
-            // Track changes in input value
-            const currentInputValue = event.target.value;
+        //     // Check if a character has been deleted
+        //     if (currentInputValue.length <= lastInputLength) {
+        //         // Emit event to indicate the delete button was clicked
+        //         const lastChar = "last char deleted";
+        //         socket.emit('keyboardInput', { lastChar });
+        //     } else {
+        //         // Emit event with the last entered character
+        //         const lastChar = currentInputValue.charAt(currentInputValue.length - 1);
+        //         socket.emit('keyboardInput', { lastChar });
+        //     }
 
-            // Check if a character has been deleted
-            if (currentInputValue.length <= lastInputLength) {
-                // Emit event to indicate the delete button was clicked
-                const lastChar = "last char deleted";
-                socket.emit('keyboardInput', { lastChar });
-            } else {
-                // Emit event with the last entered character
-                const lastChar = currentInputValue.charAt(currentInputValue.length - 1);
-                socket.emit('keyboardInput', { lastChar });
-            }
+        //     // Update the previous input length
+        //     lastInputLength = currentInputValue.length;
+        // });
 
-            // Update the previous input length
-            lastInputLength = currentInputValue.length;
-        });
 
         // Event handler for checking the condition from the server
         socket.on('condition_cursor_check', (data) => {
@@ -115,7 +89,27 @@
 
             // If the condition is valid, focus on the hidden input field
             if (conditionValid) {
-                document.getElementById("autofocusInput").focus();
+                const autofocusInput = document.getElementById("autofocusInput");
+                autofocusInput.focus();
+                let lastInputLength = 0;
+                autofocusInput.addEventListener('input', (event) => {
+                    // Track changes in input value
+                    const currentInputValue = event.target.value;
+
+                    // Check if a character has been deleted
+                    if (currentInputValue.length <= lastInputLength) {
+                        // Emit event to indicate the delete button was clicked
+                        const lastChar = "last char deleted";
+                        socket.emit('keyboardInput', { lastChar });
+                    } else {
+                        // Emit event with the last entered character
+                        const lastChar = currentInputValue.charAt(currentInputValue.length - 1);
+                        socket.emit('keyboardInput', { lastChar });
+                    }
+
+                    // Update the previous input length
+                    lastInputLength = currentInputValue.length;
+                });
             }
         });
     </script>
