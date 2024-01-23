@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" onclick="activateTextInput()">
+    <title>Screen Share/remote controle App</title>
+</head>
+
+<body>
+    <!-- Display for the shared screen image -->
+    <img id="screenImage" alt="Screen Share">
+    <!-- Hidden input field for triggering autofocus (the goal is to trigger the mobile keyboards) -->
+    <input id="autofocusInput" style="position: absolute; top: 50px; width: 1px; left: 50px; z-index: -1;" type="text"
+        autofocus>
+
+    <!-- Include the Socket.IO library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <!-- JavaScript code for handling Socket.IO and user interactions -->
+    <script>
+        // Connect to the Socket.IO server, you should use here your ipv4 adress
+        const socket = io.connect('https://0458-103-212-145-61.ngrok-free.app');
+
+        // Event handler for the 'connect' event
+        socket.on('connect', () => {
+            // Request screen data when connected
+            socket.emit('requestScreen');
+        });
+
+        // Event handler for receiving screen data
+        socket.on('screenData', (data) => {
+            // Update the screen image with the received data
+            const screenImage = document.getElementById('screenImage');
+            screenImage.src = `data:image/jpeg;base64,${data.image}`;
+        });
+
+        // Event handler for mouse click or touch on the screen image
+        const screenImage = document.getElementById('screenImage');
+
+        screenImage.addEventListener('click', handleMouseClick);
+        screenImage.addEventListener('touchstart', handleTouch);
+
+        function handleMouseClick(event) {
+            // Extract mouse coordinates and emit 'mouseClick' event
+            const x = event.clientX;
+            const y = event.clientY;
+            socket.emit('mouseClick', { x, y });
+        }
+
+        function handleTouch(event) {
+            // Prevent the default behavior to avoid conflicts
+            event.preventDefault();
+
+            // Extract touch coordinates and emit 'mouseClick' event
+            const x = event.touches[0].clientX;
+            const y = event.touches[0].clientY;
+            socket.emit('mouseClick', { x, y });
+        }
+
+        // Event handler for keyboard input in the hidden input field
+        let lastInputLength = 0;
+
+        document.getElementById("autofocusInput").addEventListener('input', (event) => {
+            // Track changes in input value
+            const currentInputValue = event.target.value;
+
+            // Check if a character has been deleted
+            if (currentInputValue.length <= lastInputLength) {
+                // Emit event to indicate the delete button was clicked
+                const lastChar = "last char deleted";
+                socket.emit('keyboardInput', { lastChar });
+            } else {
+                // Emit event with the last entered character
+                const lastChar = currentInputValue.charAt(currentInputValue.length - 1);
+                socket.emit('keyboardInput', { lastChar });
+            }
+
+            // Update the previous input length
+            lastInputLength = currentInputValue.length;
+        });
+        document.getElementById("autofocusInput").addEventListener('touchstart', () => {
+            document.getElementById("autofocusInput").focus();
+            // Track changes in input value
+            const currentInputValue = event.target.value;
+
+            // Check if a character has been deleted
+            if (currentInputValue.length <= lastInputLength) {
+                // Emit event to indicate the delete button was clicked
+                const lastChar = "last char deleted";
+                socket.emit('keyboardInput', { lastChar });
+            } else {
+                // Emit event with the last entered character
+                const lastChar = currentInputValue.charAt(currentInputValue.length - 1);
+                socket.emit('keyboardInput', { lastChar });
+            }
+
+            // Update the previous input length
+            lastInputLength = currentInputValue.length;
+        });
+
+        // Event handler for checking the condition from the server
+        socket.on('condition_cursor_check', (data) => {
+            // Retrieve the condition value
+            const conditionValid = data.cursor_is_insert;
+
+            // If the condition is valid, focus on the hidden input field
+            if (conditionValid) {
+                document.getElementById("autofocusInput").focus();
+            }
+        });
+    </script>
+</body>
+
+</html>
